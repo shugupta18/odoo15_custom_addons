@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="action_hospital_female_patient" model="ir.actions.act_window">
+        <field name="name">Patients</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hospital.patient</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Patient !
+            </p>
+        </field>
+        <field name="domain">[('gender', '=', 'female')]</field>
+    </record>
+
+    <menuitem
+            id="menu_female_patient"
+            name="Female Patient"
+            sequence="0"
+            parent="menu_patient_main"
+            action="action_hospital_female_patient"
+    />
+
+</odoo>
+
