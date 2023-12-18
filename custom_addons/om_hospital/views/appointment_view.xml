@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <!-- Form View -->
+    <record id="view_hospital_appointment_form" model="ir.ui.view">
+        <field name="name">hospital.appointment.form</field>
+        <field name="model">hospital.appointment</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div>
+                        <h2>
+                            <field name="priority" widget="priority" />
+                        </h2>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="patient_id"/>
+                            <field name="ref"/>
+                            <field name="gender" />
+                            <field name="booking_date"/>
+                        </group>
+                        <group>
+                            <field name="appointment_datetime"/>
+                        </group>
+                        <group>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Prescription" name="prescription">
+                            <field name="prescription" placeholder="Enter your prescription" />
+                        </page>
+                        <page string="Pharmacy" name="pharmacy">
+                            <group>
+                                <field name="appointment_datetime"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <!-- Add Chatter-->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_hospital_appointment_tree" model="ir.ui.view">
+        <field name="name">hospital.appointment.tree</field>
+        <field name="model">hospital.appointment</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="ref"/>
+                <field name="patient_id"/>
+                <field name="appointment_datetime"/>
+                <field name="booking_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_hospital_appointment_search" model="ir.ui.view">
+        <field name="name">hospital.appointment.search</field>
+        <field name="model">hospital.appointment</field>
+        <field name="arch" type="xml">
+            <search>
+
+            </search>
+        </field>
+    </record>
+
+    <!-- Appointment Sub-menu Action -->
+    <record id="action_hospital_appointment" model="ir.actions.act_window">
+        <field name="name">Appointments</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">hospital.appointment</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="context">{}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Appointment Patient !
+            </p>
+        </field>
+    </record>
+
+    <!-- Appointment sub-menuitem of Appointments menu -->
+    <menuitem
+            id="menu_appointment"
+            name="Appointments"
+            sequence="10"
+            parent="menu_appointment_main"
+            action="action_hospital_appointment"
+    />
+
+</odoo>
