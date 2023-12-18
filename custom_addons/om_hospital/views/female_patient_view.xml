@@ -1,20 +1,24 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
+    <!-- Female Patient sub-menu Action -->
     <record id="action_hospital_female_patient" model="ir.actions.act_window">
-        <field name="name">Patients</field>
+        <field name="name">Female Patients</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">hospital.patient</field>
         <field name="view_mode">tree,form,kanban</field>
-        <field name="context">{}</field>
+        <!-- Context(Dictionary): Default gender="female" -->
+        <field name="context">{'default_gender':'female'}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                Create a new Patient !
+                Create a new female Patient !
             </p>
         </field>
+        <!-- Domain (List): WHERE gender="female" -->
         <field name="domain">[('gender', '=', 'female')]</field>
     </record>
 
+    <!-- Female Patient sub-menuitem -->
     <menuitem
             id="menu_female_patient"
             name="Female Patient"
@@ -22,6 +26,4 @@
             parent="menu_patient_main"
             action="action_hospital_female_patient"
     />
-
 </odoo>
-
