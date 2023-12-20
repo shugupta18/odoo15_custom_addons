@@ -6,7 +6,7 @@
     'author': 'Digital Order Pvt Ltd.',
     'summary': 'Hospital management system',
     'description': """Hospital management system""",
-    'depends': ['base', 'mail'],
+    'depends': ['base', 'mail', 'product'],
     'data': [
         'security/ir.model.access.csv',
         'views/menu.xml',

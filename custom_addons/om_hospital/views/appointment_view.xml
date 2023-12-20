@@ -7,10 +7,43 @@
         <field name="model">hospital.appointment</field>
         <field name="arch" type="xml">
             <form>
-                 <!-- To add status bar -->
+                <!-- To add status bar -->
+                <!-- # this will make the statusBar clickable #
+                       options="{'clickable': '1'}"
+                -->
                 <header>
-                    <field name="state" widget="statusbar" nolabel="1"
-                           options="{'clickable': '1'}"
+                    <!-- buttons to control statusBar states -->
+                    <!-- draft, in_consultation, done, cancelled -->
+                    <button type="object"
+                            name="action_draft"
+                            string="Mark as draft"
+                            class="oe_highlight"
+                            states="cancelled"
+                    />
+                    <button type="object"
+                            name="action_in_consultation"
+                            string="In Consultation"
+                            class="oe_highlight"
+                            states="draft"
+                            data-hotkey="y"
+                    />
+                    <button type="object"
+                            name="action_done"
+                            string="Mark as Done"
+                            class="oe_highlight"
+                            states="in_consultation"
+                    />
+                    <button type="object"
+                            name="action_cancel"
+                            string="Cancel"
+                            states="draft, in_consultation"
+                            data-hotkey="z"
+                    />
+
+                    <!-- Status Bar -->
+                    <field name="state"
+                           widget="statusbar"
+                           nolabel="1"
                            statusbar_visible="draft,in_consultation,done"
                     />
                 </header>
@@ -18,15 +51,19 @@
                     <!-- Add a priority widget -->
                     <div>
                         <h2>
-                            <field name="priority" widget="priority" />
+                            <field name="priority" widget="priority"/>
                         </h2>
                     </div>
                     <group>
                         <group>
                             <field name="patient_id"/>
                             <field name="ref"/>
-                            <field name="gender" />
-                            <field name="booking_date" help="helptext coming from xml definition" />
+                            <field name="gender"/>
+                            <field name="doctor_id" widget="many2one_avatar"/>
+                            <field name="booking_date"
+                                   help="helptext is coming from xml definition"
+                                   default_focus="1"
+                            />
                         </group>
                         <group>
                             <field name="appointment_datetime"/>
@@ -52,12 +89,24 @@
                     </group>
                     <notebook>
                         <page string="Prescription" name="prescription">
-                            <field name="prescription" placeholder="Enter your prescription" />
+                            <field name="prescription"
+                                   placeholder="Enter your prescription"
+                                   options="{ 'collaborative': true, 'resizable': true }"
+                            />
                         </page>
                         <page string="Pharmacy" name="pharmacy">
-                            <group>
-                                <field name="appointment_datetime"/>
-                            </group>
+                            <field name="pharmacy_line_ids">
+                                <form>
+                                    <field name="product_id"/>
+                                    <field name="qty"/>
+                                    <field name="price_unit"/>
+                                </form>
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="qty"/>
+                                    <field name="price_unit"/>
+                                </tree>
+                            </field>
                         </page>
                     </notebook>
                 </sheet>
@@ -76,11 +125,28 @@
         <field name="name">hospital.appointment.tree</field>
         <field name="model">hospital.appointment</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree decoration-warning="state == 'in_consultation'"
+                  decoration-success="state == 'done'"
+                  decoration-danger="state == 'cancelled'"
+                  sample="1"
+                  multi_edit="1"
+            >
                 <field name="ref"/>
                 <field name="patient_id"/>
                 <field name="appointment_datetime"/>
-                <field name="booking_date" />
+                <field name="gender" optional="hide"/>
+                <field name="doctor_id" widget="many2one_avatar_user"/>
+                <!-- inherited activity_ids field from mail.thread -->
+                <field name="activity_ids" widget="list_activity"/>
+                <field name="booking_date" optional="show"/>
+                <!-- colored badges in the list view -->
+                <field name="state"
+                       widget="badge"
+                       decoration-info="state == 'draft'"
+                       decoration-warning="state == 'in_consultation'"
+                       decoration-success="state == 'done'"
+                       decoration-danger="state == 'cancelled'"
+                />
             </tree>
         </field>
     </record>
