@@ -18,6 +18,10 @@
                             <field name="gender"></field>
                             <field name="ref"></field>
                             <field name="appointment_id" />
+                            <!-- widget for many2many badge -->
+                            <field name="tag_ids" widget="many2many_tags"
+                                   options="{ 'color_field': 'color' }"
+                            />
                         </group>
                         <group>
                             <!-- This field gets toggled based archive/unarchive -->

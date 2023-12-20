@@ -15,6 +15,8 @@ class HospitalPatient(models.Model):
     active = fields.Boolean(string="Active", default=True)
     appointment_id = fields.Many2one(comodel_name='hospital.appointment', string='Appointments')
 
+    # add a Many2many field
+    tag_ids = fields.Many2many('patient.tag', string="Tags")
 
     # here self represents recordset not the instance (coming from odoo compute function)
     @api.depends('date_of_birth')

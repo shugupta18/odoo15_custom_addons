@@ -11,11 +11,15 @@ class HospitalAppointment(models.Model):
     doctor_id = fields.Many2one(comodel_name='res.users', string='Doctor')
 
     # Adding One2many fields (model, field with Many2one relation in pharmacy model , string)
-    pharmacy_line_ids = fields.One2many(comodel_name='appointment.pharmacy.lines', inverse_name='appointment_id', string='Pharmacy lines')
+    pharmacy_line_ids = fields.One2many('appointment.pharmacy.lines', 'appointment_id', string='Pharmacy lines')
 
     # Adding Date and Datetime fields with default values
     appointment_datetime = fields.Datetime(string="Appointment Time", default=fields.Datetime.now)
     booking_date = fields.Date(string="Booking Date", default=fields.Date.context_today)
+
+    # field added just to test hiding One2many column based on Parent
+    # Record
+    hide_sales_price = fields.Boolean(string="Hide Sales Price")
 
     # Add a related field
     gender = fields.Selection(related='patient_id.gender', readonly=True)
@@ -40,6 +44,9 @@ class HospitalAppointment(models.Model):
         ('done', 'Done'),
         ('cancelled', 'Cancelled')
     ], string="Status", default='draft', required=True)
+
+    # add a image field for patient image (in avatar mode)
+    image = fields.Image(string="Image")
 
     @api.onchange('patient_id')
     def onchange_patient_id(self):

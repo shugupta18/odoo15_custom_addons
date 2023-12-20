@@ -39,7 +39,6 @@
                             states="draft, in_consultation"
                             data-hotkey="z"
                     />
-
                     <!-- Status Bar -->
                     <field name="state"
                            widget="statusbar"
@@ -47,7 +46,12 @@
                            statusbar_visible="draft,in_consultation,done"
                     />
                 </header>
+
                 <sheet>
+                    <field name="image"
+                           widget="image"
+                           class="oe_avatar"
+                    />
                     <!-- Add a priority widget -->
                     <div>
                         <h2>
@@ -67,6 +71,9 @@
                         </group>
                         <group>
                             <field name="appointment_datetime"/>
+                            <field name="hide_sales_price"
+                                   groups="base.group_no_one"
+                            />
                             <!-- func_test is searched in the appointment.py model -->
                             <button name="func_test"
                                     string="Object Button"
@@ -74,6 +81,7 @@
                                     class="oe_highlight"
                                     confirm="Are you sure to execute python code?"
                                     help="A message will be printed in the log"
+                                    groups="base.group_no_one"
                             />
                             <!-- this window action is called when button is pressed -->
                             <button type="action"
@@ -82,6 +90,7 @@
                                     class="oe_highlight"
                                     confirm="Are you sure to open the patient action"
                                     help="on clicking this button, you will be redirected to patient records"
+                                    groups="base.group_no_one"
                             />
                         </group>
                         <group>
@@ -91,20 +100,26 @@
                         <page string="Prescription" name="prescription">
                             <field name="prescription"
                                    placeholder="Enter your prescription"
-                                   options="{ 'collaborative': true, 'resizable': true }"
+                                   options="{ 'collaborative': true, 'resizable': true, 'codeview': true }"
                             />
                         </page>
                         <page string="Pharmacy" name="pharmacy">
                             <field name="pharmacy_line_ids">
                                 <form>
-                                    <field name="product_id"/>
-                                    <field name="qty"/>
-                                    <field name="price_unit"/>
+                                    <group>
+                                        <field name="product_id"/>
+                                        <field name="qty"/>
+                                        <field name="price_unit"
+                                               attrs="{ 'column_invisible': [('parent.hide_sales_price', '=', True)] }"
+                                        />
+                                    </group>
                                 </form>
                                 <tree editable="bottom">
                                     <field name="product_id"/>
                                     <field name="qty"/>
-                                    <field name="price_unit"/>
+                                    <field name="price_unit"
+                                           attrs="{ 'column_invisible': [('parent.hide_sales_price', '=', True)] }"
+                                    />
                                 </tree>
                             </field>
                         </page>
@@ -151,6 +166,26 @@
         </field>
     </record>
 
+    <!-- Activity View -->
+    <record id="view_hospital_appointment_activity" model="ir.ui.view">
+        <field name="name">hospital.appointment.activity</field>
+        <field name="model">hospital.appointment</field>
+        <field name="arch" type="xml">
+            <activity string="Appointments">
+                <field name="patient_id"/>
+                <field name="ref"/>
+                <templates>
+                    <div t-name="activity-box">
+                        <img t-att-src="activity_image('hospital.patient', 'image', record.patient_id.raw_value)" role="img" t-att-title="record.patient_id.value" t-att-alt="record.patient_id.value"/>
+                        <div>
+                            <field name="ref" display="full" />
+                        </div>
+                    </div>
+                </templates>
+            </activity>
+        </field>
+    </record>
+
     <!-- Search View -->
     <record id="view_hospital_appointment_search" model="ir.ui.view">
         <field name="name">hospital.appointment.search</field>
@@ -167,7 +202,7 @@
         <field name="name">Appointments</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">hospital.appointment</field>
-        <field name="view_mode">tree,form,kanban</field>
+        <field name="view_mode">tree,form,activity</field>
         <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

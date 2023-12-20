@@ -31,4 +31,11 @@
             parent="menu_hospital_main"
     />
 
+    <menuitem
+            id="menu_configuration_main"
+            name="Configurations"
+            sequence="30"
+            parent="menu_hospital_main"
+    />
+
 </odoo>
