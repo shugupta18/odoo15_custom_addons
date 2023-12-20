@@ -7,7 +7,15 @@
         <field name="model">hospital.appointment</field>
         <field name="arch" type="xml">
             <form>
+                 <!-- To add status bar -->
+                <header>
+                    <field name="state" widget="statusbar" nolabel="1"
+                           options="{'clickable': '1'}"
+                           statusbar_visible="draft,in_consultation,done"
+                    />
+                </header>
                 <sheet>
+                    <!-- Add a priority widget -->
                     <div>
                         <h2>
                             <field name="priority" widget="priority" />
@@ -18,10 +26,26 @@
                             <field name="patient_id"/>
                             <field name="ref"/>
                             <field name="gender" />
-                            <field name="booking_date"/>
+                            <field name="booking_date" help="helptext coming from xml definition" />
                         </group>
                         <group>
                             <field name="appointment_datetime"/>
+                            <!-- func_test is searched in the appointment.py model -->
+                            <button name="func_test"
+                                    string="Object Button"
+                                    type="object"
+                                    class="oe_highlight"
+                                    confirm="Are you sure to execute python code?"
+                                    help="A message will be printed in the log"
+                            />
+                            <!-- this window action is called when button is pressed -->
+                            <button type="action"
+                                    name="%(om_hospital.action_hospital_patient)d"
+                                    string="Action button"
+                                    class="oe_highlight"
+                                    confirm="Are you sure to open the patient action"
+                                    help="on clicking this button, you will be redirected to patient records"
+                            />
                         </group>
                         <group>
                         </group>
@@ -56,7 +80,7 @@
                 <field name="ref"/>
                 <field name="patient_id"/>
                 <field name="appointment_datetime"/>
-                <field name="booking_date"/>
+                <field name="booking_date" />
             </tree>
         </field>
     </record>

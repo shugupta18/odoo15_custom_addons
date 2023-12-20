@@ -17,7 +17,7 @@ class HospitalAppointment(models.Model):
     gender = fields.Selection(related='patient_id.gender', readonly=True)
 
     # ref field changes based onChange function
-    ref = fields.Char(string='Reference')
+    ref = fields.Char(string='Reference', help='Reference of the patient record')
 
     # it is a html field
     prescription = fields.Html(string='Prescription')
@@ -29,6 +29,24 @@ class HospitalAppointment(models.Model):
         ('2', 'High'),
         ('3', 'Very High')], string='Priority')
 
+    # status bar widget
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('in_consultation', 'In Consultation'),
+        ('done', 'Done'),
+        ('cancelled', 'Cancelled')
+    ], string="Status", default='draft', required=True)
+
     @api.onchange('patient_id')
     def onchange_patient_id(self):
         self.ref = self.patient_id.ref
+
+    def func_test(self):
+        print("Object button pressed!")
+        return {
+            'effect': {
+                'fadeout': 'slow',
+                'message': 'Click successful',
+                'type': 'rainbow_man'
+            }
+        }
