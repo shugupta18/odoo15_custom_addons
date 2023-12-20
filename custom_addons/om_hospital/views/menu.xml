@@ -1,18 +1,34 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
+    <!-- App level menu -->
     <menuitem
-        id="menu_hospital_main"
-        name="Hospital"
-        sequence="0"
-        web_icon="om_hospital, static/description/icon.png"
+            id="menu_hospital_main"
+            name="Hospital"
+            sequence="0"
+            web_icon="om_hospital, static/description/icon.png"
+    />
+
+    <!-- menu bar -->
+    <menuitem
+            id="menu_patient_main"
+            name="Patient Details"
+            sequence="10"
+            parent="menu_hospital_main"
     />
 
     <menuitem
-        id="menu_patient_main"
-        name="Patient Details"
-        sequence="0"
-        parent="menu_hospital_main"
+            id="menu_patient_main"
+            name="Patient Details"
+            sequence="10"
+            parent="menu_hospital_main"
+    />
+
+    <menuitem
+            id="menu_appointment_main"
+            name="Appointments"
+            sequence="20"
+            parent="menu_hospital_main"
     />
 
 </odoo>
