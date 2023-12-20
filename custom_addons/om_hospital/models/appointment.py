@@ -8,6 +8,10 @@ class HospitalAppointment(models.Model):
 
     # Adding Many2one field
     patient_id = fields.Many2one(comodel_name="hospital.patient", string="Patient")
+    doctor_id = fields.Many2one(comodel_name='res.users', string='Doctor')
+
+    # Adding One2many fields (model, field with Many2one relation in pharmacy model , string)
+    pharmacy_line_ids = fields.One2many(comodel_name='appointment.pharmacy.lines', inverse_name='appointment_id', string='Pharmacy lines')
 
     # Adding Date and Datetime fields with default values
     appointment_datetime = fields.Datetime(string="Appointment Time", default=fields.Datetime.now)
@@ -50,3 +54,32 @@ class HospitalAppointment(models.Model):
                 'type': 'rainbow_man'
             }
         }
+
+    # self is a loop representing recordset in odoo,
+    # we could pass a list for which we want states to be cancelled
+
+    def action_draft(self):
+        for rec in self:
+            rec.state = 'draft'
+
+    def action_in_consultation(self):
+        for rec in self:
+            rec.state = 'in_consultation'
+
+    def action_done(self):
+        for rec in self:
+            rec.state = 'done'
+
+    def action_cancel(self):
+        for rec in self:
+            rec.state = 'cancelled'
+
+class AppointmentPharmacyLines(models.Model):
+    _name = "appointment.pharmacy.lines"
+    _description = "Appointment Pharmacy Lines"
+
+    product_id = fields.Many2one(comodel_name='product.product', required=True)
+    price_unit = fields.Float(related='product_id.list_price')
+    qty = fields.Integer(string='Quantity', default=1)
+
+    appointment_id = fields.Many2one(comodel_name='hospital.appointment', string='Appointment')
