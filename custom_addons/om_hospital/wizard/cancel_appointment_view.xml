@@ -9,7 +9,8 @@
             <form>
                 <group>
                     <group>
-                        <field name="appointment_id"/>
+<!--                         domain="[('state', '=', 'draft')]"-->
+                        <field name="appointment_id" invisible="context.get('hide_appointment_id')" />
                         <field name="reason"/>
                     </group>
                     <group>

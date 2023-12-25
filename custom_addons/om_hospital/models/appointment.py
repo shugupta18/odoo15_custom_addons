@@ -1,4 +1,5 @@
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 
 class HospitalAppointment(models.Model):
@@ -49,23 +50,6 @@ class HospitalAppointment(models.Model):
     # add an image field for patient image (in avatar mode)
     image = fields.Image(string="Image")
 
-    # # this is a class level method
-    # @api.model
-    # def create(self, vals):
-    #     vals['ref'] = self.env['ir.sequence'].next_by_code('hospital.appointment')
-    #     super(HospitalAppointment, self).create(vals)
-    #
-    # # this is a class instance level method
-    # def write(self, vals):
-    #     if not self.ref and not vals.get('ref'):
-    #         vals['ref'] = self.env['ir.sequence'].next_by_code('hospital.appointment')
-    #     super(HospitalAppointment, self).write(vals)
-
-    @api.onchange('patient_id')
-    def onchange_patient_id(self):
-        self.ref = self.patient_id.ref
-        return
-
     def func_test(self):
         print("Object button pressed!")
         return {
@@ -92,11 +76,27 @@ class HospitalAppointment(models.Model):
             rec.state = 'done'
 
     def action_cancel(self):
-        print('cancel', self)
         action = self.env.ref('om_hospital.action_cancel_appointment').read()[0]
         for rec in self:
             rec.state = 'cancelled'
         return action
+
+    # this is a class level method
+    @api.model
+    def create(self, vals):
+        vals['ref'] = self.env['ir.sequence'].next_by_code('hospital.appointment')
+        return super(HospitalAppointment, self).create(vals)
+
+    # this is a class instance level method
+    def write(self, vals):
+        if not self.ref and not vals.get('ref'):
+            vals['ref'] = self.env['ir.sequence'].next_by_code('hospital.appointment')
+        super(HospitalAppointment, self).write(vals)
+
+    def unlink(self):
+        if self.state != 'draft':
+            raise ValidationError(_("Only appointments in 'draft' state can be deleted"))
+        return super(HospitalAppointment, self).unlink()
 
 
 class AppointmentPharmacyLines(models.Model):

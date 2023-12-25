@@ -8,7 +8,7 @@
         <field name="res_model">hospital.patient</field>
         <field name="view_mode">tree,form,kanban</field>
         <!-- Context(Dictionary): Default gender="female" -->
-        <field name="context">{'default_gender':'female'}</field>
+        <field name="context">{'default_gender':'female', 'hide_gender': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create a new female Patient !

@@ -1,5 +1,6 @@
 from datetime import date
-from odoo import api, fields, models
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 
 class HospitalPatient(models.Model):
@@ -15,9 +16,22 @@ class HospitalPatient(models.Model):
     # active field is added to enable Archive / Unarchive feature
     active = fields.Boolean(string="Active", default=True)
     appointment_id = fields.Many2one(comodel_name='hospital.appointment', string='Appointments')
-
     # add a Many2many field
     tag_ids = fields.Many2many('patient.tag', string="Tags")
+    # stored compute Field
+    appointment_count = fields.Integer(string="Appointment Count", compute='_compute_appointment_count', store=True)
+    appointment_ids = fields.One2many(comodel_name='hospital.appointment', inverse_name='patient_id', string="Appointments")
+
+    @api.depends('appointment_ids')
+    def _compute_appointment_count(self):
+        for record in self:
+            record.appointment_count = self.env['hospital.appointment'].search_count([('patient_id', '=', record.id)])
+
+    @api.constrains('date_of_birth')
+    def _check_date_of_birth(self):
+        for record in self:
+            if record.date_of_birth and record.date_of_birth > fields.Date.today():
+                raise ValidationError(_('The entered date of birth is not acceptable!'))
 
     # this is a class level method
     @api.model

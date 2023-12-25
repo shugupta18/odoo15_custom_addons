@@ -35,27 +35,14 @@
                     />
                     <!-- launch cancel-appointment wizard -->
                     <!-- XML way -->
-                    <!--                    <button type="action"-->
-                    <!--                            name="%(om_hospital.action_cancel_appointment)d"-->
-                    <!--                            string="Cancel"-->
-                    <!--                            states="draft, in_consultation"-->
-                    <!--                            data-hotkey="z"-->
-                    <!--                    />-->
-                    <!--                    -->
-                    <!-- Python way -->
-                    <button type="object"
-                            name="action_cancel"
-                            string="Cancel"
-                            states="draft, in_consultation"
-                            data-hotkey="z"
-                    />
 
-                    <!--                    <button type="object"-->
-                    <!--                            name="action_cancel"-->
-                    <!--                            string="Cancel"-->
-                    <!--                            states="draft, in_consultation"-->
-                    <!--                            data-hotkey="z"-->
-                    <!--                    />-->
+                    <button type="action" name="%(om_hospital.action_cancel_appointment)d"
+                            string="Cancel" states="draft, in_consultation" data-hotkey="z"
+                            context="{ 'default_appointment_id': active_id, 'hide_appointment_id': 1 }" />
+
+                    <!-- Python way -->
+<!--                    <button type="object" name="action_cancel" string="Cancel"-->
+<!--                            states="draft, in_consultation" data-hotkey="z"/>-->
 
                     <!-- Status Bar -->
                     <field name="state"

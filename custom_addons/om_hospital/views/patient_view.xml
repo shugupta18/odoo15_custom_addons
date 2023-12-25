@@ -13,9 +13,10 @@
                             <field name="name"></field>
                             <field name="date_of_birth"></field>
                             <field name="age"></field>
+                            <field name="appointment_count"></field>
                         </group>
                         <group>
-                            <field name="gender"></field>
+                            <field name="gender" invisible="context.get('hide_gender')" ></field>
                             <field name="ref"></field>
                             <field name="appointment_id" />
                             <!-- widget for many2many badge -->
