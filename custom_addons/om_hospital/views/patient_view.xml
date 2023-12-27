@@ -8,25 +8,68 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
+                    <!-- For adding smart button -->
+                    <div name="button_box" class="oe_button_box">
+                        <button string="Appointments" class="oe_stat_button" type="object" name="action_view_appointment" icon="fa-star">
+                            <field string="Appointments" name="appointment_count" widget="starinfo"/>
+                        </button>
+                    </div>
+                    <!-- Alert for the birthday -->
+                    <div class="alert alert-info text-center o_form_header" role="alert"
+                            attrs="{ 'invisible': [('is_birthday', '=', False)] }">
+                        <a class="close" data-dismiss="alert" href="#" aria-label="Close"><i title="Close" class="small fa fa-times"/></a>
+                        <div>
+                            <strong>Today is Patient's Birthday!</strong>
+                        </div>
+                        <div>
+                            Wish <field name="name" />
+                        </div>
+                     </div>
+                    <!-- Show Ref and Name -->
+                    <div class="oe_title">
+                        <h4>
+                            <field name="ref" readonly="1"/>
+                        </h4>
+                        <h2>
+                            <label for="name" string="Name" class="oe_edit_only"/>
+                            <field name="name"/>
+                        </h2>
+                    </div>
+                    <!-- Main Info -->
                     <group>
                         <group>
-                            <field name="name"></field>
                             <field name="date_of_birth"></field>
                             <field name="age"></field>
-                            <field name="appointment_count"></field>
+<!--                            <field name="appointment_count"/>-->
+                            <field name="is_birthday" invisible="1"/>
                         </group>
                         <group>
-                            <field name="gender" invisible="context.get('hide_gender')" ></field>
-                            <field name="ref"></field>
-                            <field name="appointment_id" />
-                            <!-- widget for many2many badge -->
+                            <field name="gender" invisible="context.get('hide_gender')"
+                                   widget="radio"/>
+                            <field name="appointment_id"/>
+                            <!-- widget for many2many_tags (badge) -->
+                            <!-- we can use many2many_checkboxes -->
                             <field name="tag_ids" widget="many2many_tags"
-                                   options="{ 'color_field': 'color' }"
-                            />
+                                   options="{ 'color_field': 'color' }"/>
                         </group>
                         <group>
                             <!-- This field gets toggled based archive/unarchive -->
                             <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                    <!-- Other information section -->
+                    <group name="other_info" string="Other Information">
+                        <group>
+                            <field name="parent" attrs="{ 'invisible': [('age', '>', 18)] }"/>
+                            <field name="marital_status"/>
+                            <field name="partner_name"
+                                   attrs="{ 'readonly': [('marital_status', '!=', 'married')],
+                                            'required': [('marital_status', '=', 'married')] }"/>
+                        </group>
+                        <group>
+                            <field name="phone" widget="phone"/>
+                            <field name="email" widget="email"/>
+                            <field name="website" widget="url"/>
                         </group>
                     </group>
                 </sheet>
@@ -45,9 +88,10 @@
         <field name="name">hospital.patient.tree</field>
         <field name="model">hospital.patient</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree export_xlsx="0">
                 <field name="name" string="Patient Name"></field>
-                <field name="age"></field>
+                <field name="age" avg="Average Age"/>
+                <field name="appointment_count" sum="Total Appointments"/>
                 <field name="ref"></field>
                 <field name="gender"></field>
             </tree>
@@ -73,8 +117,8 @@
                 <filter name="filter_male" string="Male" domain="[('gender', '=', 'male')]"/>
                 <filter name="filter_female" string="Female" domain="[('gender', '=', 'female')]"/>
                 <!-- adds AND condition for filter -->
-<!--                <separator/>-->
-<!--                <filter name="filter_kids" string="Kids" domain="[('age', '&lt;=', 5)]"/>-->
+                <!--                <separator/>-->
+                <!--                <filter name="filter_kids" string="Kids" domain="[('age', '&lt;=', 5)]"/>-->
                 <separator/>
                 <filter name="filter_archived" string="Archived" domain="[('active', '=', False)]"/>
 
@@ -86,7 +130,7 @@
                 </group>
                 <!-- Adding searchpane on the left side of screen -->
                 <searchpanel>
-                    <field name="gender" icon="fa-users" select="multi" enable_counters="1" />
+                    <field name="gender" icon="fa-users" select="multi" enable_counters="1"/>
                 </searchpanel>
             </search>
         </field>

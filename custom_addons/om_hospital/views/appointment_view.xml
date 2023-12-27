@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
 
+    <!-- "Mark as Done" server action -->
+    <record id="action_mark_as_done" model="ir.actions.server">
+        <field name="name">Mark as Done</field>
+        <field name="model_id" ref="model_hospital_appointment"/>
+        <field name="binding_model_id" ref="model_hospital_appointment"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+            for record in records:
+                if record.state == 'in_consultation':
+                    record.action_done()
+        </field>
+    </record>
+
     <!-- Form View -->
     <record id="view_hospital_appointment_form" model="ir.ui.view">
         <field name="name">hospital.appointment.form</field>
@@ -8,9 +22,7 @@
         <field name="arch" type="xml">
             <form>
                 <!-- To add status bar -->
-                <!-- # this will make the statusBar clickable #
-                       options="{'clickable': '1'}"
-                -->
+                <!--  options="{'clickable': '1'}" // this will make the statusBar clickable -->
                 <header>
                     <!-- buttons to control statusBar states -->
                     <!-- draft, in_consultation, done, cancelled -->
@@ -38,11 +50,11 @@
 
                     <button type="action" name="%(om_hospital.action_cancel_appointment)d"
                             string="Cancel" states="draft, in_consultation" data-hotkey="z"
-                            context="{ 'default_appointment_id': active_id, 'hide_appointment_id': 1 }" />
+                            context="{ 'default_appointment_id': active_id, 'hide_appointment_id': 1 }"/>
 
                     <!-- Python way -->
-<!--                    <button type="object" name="action_cancel" string="Cancel"-->
-<!--                            states="draft, in_consultation" data-hotkey="z"/>-->
+                    <!--                    <button type="object" name="action_cancel" string="Cancel"-->
+                    <!--                            states="draft, in_consultation" data-hotkey="z"/>-->
 
                     <!-- Status Bar -->
                     <field name="state"
@@ -57,7 +69,7 @@
                            widget="image"
                            class="oe_avatar"
                     />
-                    <!-- Add a priority widget -->
+                    <!-- Add a priority widget (3 stars)-->
                     <div>
                         <h2>
                             <field name="priority" widget="priority"/>
@@ -65,20 +77,21 @@
                     </div>
                     <group>
                         <group>
+                            <!-- widget="selection" will make it a simple selection -->
                             <field name="patient_id"/>
-                            <field name="ref"/>
+                            <field name="ref" readonly="1" force_save="1"/>
                             <field name="gender"/>
                             <field name="doctor_id" widget="many2one_avatar"/>
-                            <field name="booking_date"
-                                   help="helptext is coming from xml definition"
-                                   default_focus="1"
-                            />
+                            <field name="booking_date" help="helptext is coming from xml definition" default_focus="1"/>
+                            <field name="operation_id"/>
+                            <field name="duration"/>
                         </group>
                         <group>
                             <field name="appointment_datetime"/>
-                            <field name="hide_sales_price"
-                                   groups="base.group_no_one"
-                            />
+                            <field name="hide_sales_price" groups="base.group_no_one"/>
+                            <!-- Adding the company and currency field in Appointment form -->
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id"  groups="base.group_multi_currency"/>
                             <!-- func_test is searched in the appointment.py model -->
                             <button name="func_test"
                                     string="Object Button"
@@ -102,6 +115,12 @@
                         </group>
                     </group>
                     <notebook>
+                        <page string="Progress" name="progress">
+<!--                            <field name="progress" widget="gauge"-->
+<!--                                   options="{ 'style': 'width: 100px; height: 100px;' }"/>-->
+                            <field name="progress" widget="percentpie"
+                                   options="{ 'style': 'width: 100px; height: 100px;' }"/>
+                        </page>
                         <page string="Prescription" name="prescription">
                             <field name="prescription"
                                    placeholder="Enter your prescription"
@@ -114,17 +133,16 @@
                                     <group>
                                         <field name="product_id"/>
                                         <field name="qty"/>
-                                        <field name="price_unit"
-                                               attrs="{ 'column_invisible': [('parent.hide_sales_price', '=', True)] }"
-                                        />
+                                        <field name="price_unit" attrs="{ 'column_invisible': [('parent.hide_sales_price', '=', True)] }"/>
                                     </group>
                                 </form>
                                 <tree editable="bottom">
                                     <field name="product_id"/>
                                     <field name="qty"/>
-                                    <field name="price_unit"
-                                           attrs="{ 'column_invisible': [('parent.hide_sales_price', '=', True)] }"
-                                    />
+                                    <field name="price_unit" widget="monetary" options="{ 'currency_field': 'company_currency_id' }"
+                                           attrs="{ 'column_invisible': [('parent.hide_sales_price', '=', True)] }"/>
+                                    <field name="company_currency_id" invisible="1"/>
+                                    <field name="price_subtotal"/>
                                 </tree>
                             </field>
                         </page>
@@ -148,9 +166,10 @@
             <tree decoration-warning="state == 'in_consultation'"
                   decoration-success="state == 'done'"
                   decoration-danger="state == 'cancelled'"
-                  sample="1"
-                  multi_edit="1"
-            >
+                  sample="1" multi_edit="1">
+                <header>
+                    <button type="object" name="action_in_consultation" string="In Consultation"/>
+                </header>
                 <field name="ref"/>
                 <field name="patient_id"/>
                 <field name="appointment_datetime"/>
@@ -167,7 +186,37 @@
                        decoration-success="state == 'done'"
                        decoration-danger="state == 'cancelled'"
                 />
+                <button type="object" name="action_done" class="fa fa-check btn-success"
+                        attrs="{ 'invisible': [('state', '!=', 'in_consultation')] }"
+                        title="Mark as Done"/>
+                <button type="action" name="%(om_hospital.action_cancel_appointment)d" class="fa fa-times btn-danger"
+                        context="{ 'default_appointment_id': active_id, 'hide_appointment_id': 1 }"
+                        attrs="{ 'invisible': [('state', 'not in', ('draft', 'in_consultation'))] }"
+                        title="Cancel"/>
+                <groupby name="patient_id">
+                    <button type="object" name="action_test" string="Click Me!" class="oe_highlight"/>
+                    <button type="edit" name="edit" string="Edit"/>
+                </groupby>
+                <field name="progress" widget="progressbar"/>
             </tree>
+        </field>
+    </record>
+
+    <!-- Calendar View -->
+    <record id="view_hospital_appointment_calendar" model="ir.ui.view">
+        <field name="name">hospital.appointment.calendar</field>
+        <field name="model">hospital.appointment</field>
+        <field name="arch" type="xml">
+            <!-- date_start, date_stop, date_delay, color, form_view_id, event_open_popup -->
+            <!-- quick_add, mode, avatar_field, filters, hide_time, event_limit -->
+            <calendar string="Appointments" date_start="booking_date" mode="month" date_delay="duration"
+                      color="state" quick_add="False" hide_time="True" event_open_popup="True"
+                      form_view_id="%(om_hospital.view_hospital_appointment_form)d"
+                      event_limit="5">
+                <!-- Avatar can be added below avatar_field="img" -->
+                <field name="patient_id" filters="1"/>
+                <field name="state" filters="1" invisible="1"/>
+            </calendar>
         </field>
     </record>
 
@@ -208,7 +257,7 @@
         <field name="name">Appointments</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">hospital.appointment</field>
-        <field name="view_mode">tree,form,activity</field>
+        <field name="view_mode">tree,form,calendar,activity</field>
         <field name="context">{}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

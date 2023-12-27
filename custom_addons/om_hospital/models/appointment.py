@@ -1,3 +1,5 @@
+import random
+
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
@@ -7,9 +9,15 @@ class HospitalAppointment(models.Model):
     _description = "Hospital Appointment"
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'ref'
+    _order = 'id desc'
+
+    # required for showing currency
+    company_id = fields.Many2one(comodel_name='res.company', string='Company', default=lambda self: self.env.company)
+    currency_id = fields.Many2one(comodel_name='res.currency', related='company_id.currency_id')
 
     # Adding Many2one field
-    patient_id = fields.Many2one(comodel_name="hospital.patient", string="Patient")
+    # ondelete='restrict' OR ondelete='cascade'
+    patient_id = fields.Many2one(comodel_name="hospital.patient", string="Patient", ondelete='cascade')
     doctor_id = fields.Many2one(comodel_name='res.users', string='Doctor')
 
     # Adding One2many fields (model, field with Many2one relation in pharmacy model , string)
@@ -50,6 +58,11 @@ class HospitalAppointment(models.Model):
     # add an image field for patient image (in avatar mode)
     image = fields.Image(string="Image")
 
+    operation_id = fields.Many2one(comodel_name='hospital.operation', string='Operation')
+
+    progress = fields.Integer(string='Progress', compute='_compute_progress')
+    duration = fields.Float(string="Duration")
+
     def func_test(self):
         print("Object button pressed!")
         return {
@@ -69,7 +82,8 @@ class HospitalAppointment(models.Model):
 
     def action_in_consultation(self):
         for rec in self:
-            rec.state = 'in_consultation'
+            if rec.state == 'draft':
+                rec.state = 'in_consultation'
 
     def action_done(self):
         for rec in self:
@@ -94,9 +108,27 @@ class HospitalAppointment(models.Model):
         super(HospitalAppointment, self).write(vals)
 
     def unlink(self):
-        if self.state != 'draft':
-            raise ValidationError(_("Only appointments in 'draft' state can be deleted"))
+        for record in self:
+            if record.state != 'draft':
+                raise ValidationError(_("Only appointments in 'draft' state can be deleted"))
         return super(HospitalAppointment, self).unlink()
+
+    @api.onchange('patient_id')
+    def onchange_patient_id(self):
+        self.ref = self.patient_id.ref
+
+    @api.depends('state')
+    def _compute_progress(self):
+        for record in self:
+            if record.state == 'draft':
+                progress = random.randrange(0, 25)
+            elif record.state == 'in_consultation':
+                progress = random.randrange(25, 75)
+            elif record.state == 'done':
+                progress = 100
+            else:
+                progress = 0
+            record.progress = progress
 
 
 class AppointmentPharmacyLines(models.Model):
@@ -106,5 +138,11 @@ class AppointmentPharmacyLines(models.Model):
     product_id = fields.Many2one(comodel_name='product.product', required=True)
     price_unit = fields.Float(related='product_id.list_price')
     qty = fields.Integer(string='Quantity', default=1)
-
     appointment_id = fields.Many2one(comodel_name='hospital.appointment', string='Appointment')
+    company_currency_id = fields.Many2one(comodel_name='res.currency', related='appointment_id.currency_id')
+    price_subtotal = fields.Monetary(string='Subtotal', currency_field='company_currency_id', compute='_compute_price_subtotal')
+
+    @api.depends('price_unit', 'qty')
+    def _compute_price_subtotal(self):
+        for record in self:
+            record.price_subtotal = record.price_unit * record.qty

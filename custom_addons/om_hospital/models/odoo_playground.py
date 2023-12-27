@@ -21,8 +21,14 @@ class OdooPlayground(models.Model):
     \n\n\n\n"""
 
     model_id = fields.Many2one('ir.model', string="Model")
-    code = fields.Text(string="Code", default=DEFAULT_ENV_VARIABLES)
+    # code = fields.Text(string="Code", default=DEFAULT_ENV_VARIABLES)
+    code = fields.Text(string="Code")
     result = fields.Text(string="Result")
+
+    def action_clear(self):
+        print('button clicked!')
+        self.code = ''
+        self.result = ''
 
     def action_execute(self):
         print("action execute in the odoo playground clicked!")
